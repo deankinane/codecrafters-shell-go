@@ -17,5 +17,5 @@ func main() {
 	}
 
 	in = strings.Trim(in, "\r\n ")
-	fmt.Fprint(os.Stdout, in+": command not found")
+	fmt.Fprint(os.Stdout, in+": command not found\r\n")
 }
