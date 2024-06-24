@@ -31,30 +31,32 @@ func main() {
 
 func handle_args(args []string) error {
 	var err error
-	for i := 0; i < len(args); i++ {
-		com := strings.ToLower(args[i])
+	com := strings.ToLower(args[0])
 
-		switch com {
-		case CommandExit:
-			i += 1
-			err = command_exit(args[i])
-		case CommandEcho:
-			i += 1
-			command_echo(args[i:])
-			return nil
-		default:
-			err = errors.New(com + ": command not found")
-		}
+	switch com {
+	case CommandExit:
+		err = command_exit(args)
+	case CommandEcho:
+		command_echo(args)
+		return nil
+	case CommandType:
+		err = command_type(args)
+	default:
+		err = errors.New(com + ": command not found")
+	}
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func command_exit(code string) error {
+func command_exit(args []string) error {
+	if len(args) == 1 {
+		return errors.New("no error code provided")
+	}
+	code := args[1]
 	int_code, err := strconv.Atoi(code)
 	if err != nil {
 		return errors.New("invalid exit code")
@@ -64,12 +66,41 @@ func command_exit(code string) error {
 	return nil
 }
 
-func command_echo(words []string) error {
-	fmt.Println(strings.Join(words, " "))
+func command_echo(args []string) {
+	fmt.Println(strings.Join(args[1:], " "))
+}
+
+func command_type(args []string) error {
+	if len(args) == 1 {
+		return errors.New("no command provided")
+	}
+	com := args[1]
+	t, ok := CommandTypes[com]
+	if !ok {
+		fmt.Println(com + ": not found")
+		return nil
+	}
+
+	switch t {
+	case TypeBuiltin:
+		fmt.Println(com, "is a shell builtin")
+	}
+
 	return nil
 }
 
 const (
 	CommandExit = "exit"
 	CommandEcho = "echo"
+	CommandType = "type"
 )
+
+const (
+	TypeBuiltin = "builtin"
+)
+
+var CommandTypes = map[string]string{
+	CommandExit: TypeBuiltin,
+	CommandEcho: TypeBuiltin,
+	CommandType: TypeBuiltin,
+}
