@@ -38,6 +38,10 @@ func handle_args(args []string) error {
 		case CommandExit:
 			i += 1
 			err = command_exit(args[i])
+		case CommandEcho:
+			i += 1
+			command_echo(args[i:])
+			return nil
 		default:
 			err = errors.New(com + ": command not found")
 		}
@@ -60,6 +64,12 @@ func command_exit(code string) error {
 	return nil
 }
 
+func command_echo(words []string) error {
+	fmt.Println(strings.Join(words, " "))
+	return nil
+}
+
 const (
 	CommandExit = "exit"
+	CommandEcho = "echo"
 )
