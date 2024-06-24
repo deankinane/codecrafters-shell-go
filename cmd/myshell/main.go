@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -77,8 +79,14 @@ func command_type(args []string) error {
 	com := args[1]
 	t, ok := CommandTypes[com]
 	if !ok {
-		fmt.Println(com + ": not found")
-		return nil
+		path, ok := command_type_check_path(com)
+		if !ok {
+			fmt.Println(com + ": not found")
+			return nil
+		} else {
+			fmt.Println(com, "is", path)
+			return nil
+		}
 	}
 
 	switch t {
@@ -87,6 +95,19 @@ func command_type(args []string) error {
 	}
 
 	return nil
+}
+
+func command_type_check_path(path string) (string, bool) {
+	paths := strings.Split(os.Getenv("PATH"), ":")
+	for _, p := range paths {
+		files, _ := os.ReadDir(p)
+		idx := slices.IndexFunc(files, func(f fs.DirEntry) bool { return f.Name() == path })
+		if idx > -1 {
+			return p + "/" + path, true
+		}
+	}
+
+	return "", false
 }
 
 const (
