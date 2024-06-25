@@ -46,6 +46,8 @@ func handle_args(args []string) error {
 		err = command_type(args)
 	case CommandPwd:
 		err = command_pwd(args)
+	case CommandCd:
+		err = command_cd(args)
 	default:
 		err = command_run(args)
 	}
@@ -141,11 +143,30 @@ func command_pwd(args []string) error {
 	return nil
 }
 
+func command_cd(args []string) error {
+	if len(args) > 2 {
+		return errors.New("too many arguments")
+	}
+
+	if len(args) == 1 {
+		return nil
+	}
+
+	path := args[1]
+
+	err := os.Chdir(path)
+	if err != nil {
+		return errors.New(fmt.Sprint("cd: ", path+": ", "No such file or directory"))
+	}
+	return nil
+}
+
 const (
 	CommandExit = "exit"
 	CommandEcho = "echo"
 	CommandType = "type"
 	CommandPwd  = "pwd"
+	CommandCd   = "cd"
 )
 
 const (
@@ -157,4 +178,5 @@ var CommandTypes = map[string]string{
 	CommandEcho: TypeBuiltin,
 	CommandType: TypeBuiltin,
 	CommandPwd:  TypeBuiltin,
+	CommandCd:   TypeBuiltin,
 }
