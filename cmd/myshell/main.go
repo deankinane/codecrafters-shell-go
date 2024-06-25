@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
@@ -44,7 +45,7 @@ func handle_args(args []string) error {
 	case CommandType:
 		err = command_type(args)
 	default:
-		err = errors.New(com + ": command not found")
+		err = command_run(args)
 	}
 
 	if err != nil {
@@ -108,6 +109,20 @@ func command_type_check_path(path string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func command_run(args []string) error {
+	path := args[0]
+	_, ok := command_type_check_path(path)
+	if !ok {
+		return errors.New(path + ": command not found")
+	}
+	out, err := exec.Command(path, strings.Join(args[1:], " ")).Output()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(out))
+	return nil
 }
 
 const (
