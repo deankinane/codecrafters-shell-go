@@ -154,6 +154,16 @@ func command_cd(args []string) error {
 
 	path := args[1]
 
+	if strings.HasPrefix(path, "~") {
+		home := os.Getenv("HOME")
+		os.Chdir(home)
+		path = strings.TrimPrefix(path, "~")
+		path = strings.TrimPrefix(path, "/")
+		if len(path) == 0 {
+			return nil
+		}
+	}
+
 	err := os.Chdir(path)
 	if err != nil {
 		return errors.New(fmt.Sprint("cd: ", path+": ", "No such file or directory"))
