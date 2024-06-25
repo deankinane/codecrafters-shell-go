@@ -44,6 +44,8 @@ func handle_args(args []string) error {
 		return nil
 	case CommandType:
 		err = command_type(args)
+	case CommandPwd:
+		err = command_pwd(args)
 	default:
 		err = command_run(args)
 	}
@@ -117,11 +119,25 @@ func command_run(args []string) error {
 	if !ok {
 		return errors.New(path + ": command not found")
 	}
-	out, err := exec.Command(path, strings.Join(args[1:], " ")).Output()
+	cmd := exec.Command(path, strings.Join(args[1:], " "))
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	return err
+}
+
+func command_pwd(args []string) error {
+	if len(args) > 1 {
+		return errors.New("invalid arguments for pwd command")
+	}
+
+	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	fmt.Print(string(out))
+
+	fmt.Println(cwd)
 	return nil
 }
 
@@ -129,6 +145,7 @@ const (
 	CommandExit = "exit"
 	CommandEcho = "echo"
 	CommandType = "type"
+	CommandPwd  = "pwd"
 )
 
 const (
@@ -139,4 +156,5 @@ var CommandTypes = map[string]string{
 	CommandExit: TypeBuiltin,
 	CommandEcho: TypeBuiltin,
 	CommandType: TypeBuiltin,
+	CommandPwd:  TypeBuiltin,
 }
